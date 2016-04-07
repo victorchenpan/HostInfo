@@ -1,0 +1,66 @@
+#include "hostinfo.h"
+
+HostInfo::HostInfo(QWidget *parent)
+    : QWidget(parent)
+{
+    this->resize(400,300);
+    hostname=new QLabel(this);
+    hostname->setGeometry(0,0,90,30);
+    hostname->setText(tr("host name:"));
+  //  hostname->setAlignment(Qt::AlignCenter);
+    hostIp=new QLabel(this);
+    hostIp->setText(tr("host ip:"));
+  //  hostIp->setAlignment(Qt::AlignCenter);
+    hostIp->setGeometry(0,60,90,30);
+    hostnameLine=new QLineEdit(this);
+    hostnameLine->setGeometry(120,0,200,30);
+    hostIpLine=new QLineEdit(this);
+    hostIpLine->setGeometry(120,60,200,30);
+
+
+    detail=new QPushButton(tr("Detail"),this);
+    detail->setGeometry(50,120,190,30);
+ //   QGroupBox groupbox(this);
+/*    QGridLayout gridLayout(this);
+    gridLayout.addWidget(hostname,0,0);
+    gridLayout.addWidget(hostnameLine,0,1);
+    gridLayout.addWidget(hostIp,1,0);
+    gridLayout.addWidget(hostIpLine,1,1);
+    gridLayout.addWidget(detail,2,0);
+    */
+
+
+    /*Network*/
+    QString name=QHostInfo::localHostName();
+    Host_Info=QHostInfo::fromName(name);
+    hostnameLine->setText(name);
+    QList<QHostAddress> listaddr=Host_Info.addresses();
+    if(!listaddr.isEmpty())
+       // QHostAddress address=listaddr.first();
+    hostIpLine->setText(listaddr.first().toString());
+    connect(detail,SIGNAL(clicked(bool)),this,SLOT(slot_detail()));
+}
+void HostInfo::slot_detail()
+{
+    QString detail_info="";
+    QList<QNetworkInterface>list_interface=QNetworkInterface::allInterfaces();
+    for(int i=0;i<list_interface.count();++i)
+    {
+        interface=list_interface.at(i);
+        detail_info=detail_info+tr("Device:")+interface.name()+"\n";
+        detail_info=detail_info+tr("Hardware Address:")+interface.hardwareAddress()+"\n";
+        QList<QNetworkAddressEntry> list_entry=interface.addressEntries();
+        for(int j=0;j<list_entry.count();++j)
+        {
+            networkAddressEntry=list_entry.at(j);
+            detail_info=detail_info+"\t"+tr("IP address:")+networkAddressEntry.ip().toString()+"\n";
+            detail_info=detail_info+"\t"+tr("IP netmask:")+networkAddressEntry.netmask().toString()+"\n";
+            detail_info=detail_info+"\t"+tr("IP broadcast")+networkAddressEntry.broadcast().toString()+"\n";
+        }
+    }
+    QMessageBox::information(this,tr("Detail_info"),detail_info);
+}
+HostInfo::~HostInfo()
+{
+
+}
